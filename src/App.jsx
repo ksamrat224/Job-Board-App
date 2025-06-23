@@ -1,7 +1,12 @@
+import React from 'react'
+import SignupPage from './pages/SignupPage'
 
 const App = () => {
   return (
-<div>samrat</div>  )
- className=''}
+    <>
+    <SignupPage/>
+    </>
+  )
+}
 
 export default App
