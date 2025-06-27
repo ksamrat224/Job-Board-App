@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, DollarSign, Clock, Building, Heart, Share2, Upload, Check } from 'lucide-react';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
 
 const JobDetailPage = () => {
   const { id } = useParams();
   const [isApplying, setIsApplying] = useState(false);
   const [applicationStep, setApplicationStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationData, setApplicationData] = useState({
     firstName: '',
     lastName: '',
@@ -78,15 +81,31 @@ const JobDetailPage = () => {
     }
   ];
 
-  const handleApplicationSubmit = (e) => {
+  const handleApplicationSubmit = async (e) => {
     e.preventDefault();
+    
     if (applicationStep < 3) {
       setApplicationStep(applicationStep + 1);
     } else {
-      // Submit application
+      setIsSubmitting(true);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       alert('Application submitted successfully!');
       setIsApplying(false);
       setApplicationStep(1);
+      setIsSubmitting(false);
+      
+      // Reset form
+      setApplicationData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        coverLetter: '',
+        resume: null
+      });
     }
   };
 
@@ -98,216 +117,218 @@ const JobDetailPage = () => {
     });
   };
 
-  const ApplicationModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Apply for {job.title}</h2>
-            <button
-              onClick={() => setIsApplying(false)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-          </div>
+  const handlePreviousStep = () => {
+    if (applicationStep > 1) {
+      setApplicationStep(applicationStep - 1);
+    } else {
+      setIsApplying(false);
+    }
+  };
 
-          {/* Progress Steps */}
-          <div className="flex items-center mb-8">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step <= applicationStep 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}>
-                  {step < applicationStep ? <Check className="h-4 w-4" /> : step}
+  const ApplicationModalContent = () => (
+    <div>
+      {/* Progress Steps */}
+      <div className="flex items-center mb-8">
+        {[1, 2, 3].map((step) => (
+          <div key={step} className="flex items-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              step <= applicationStep 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-600'
+            }`}>
+              {step < applicationStep ? <Check className="h-4 w-4" /> : step}
+            </div>
+            {step < 3 && (
+              <div className={`w-16 h-1 mx-2 ${
+                step < applicationStep ? 'bg-blue-600' : 'bg-gray-200'
+              }`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleApplicationSubmit}>
+        {/* Step 1: Personal Information */}
+        {applicationStep === 1 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  disabled={isSubmitting}
+                  value={applicationData.firstName}
+                  onChange={(e) => setApplicationData({
+                    ...applicationData,
+                    firstName: e.target.value
+                  })}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  disabled={isSubmitting}
+                  value={applicationData.lastName}
+                  onChange={(e) => setApplicationData({
+                    ...applicationData,
+                    lastName: e.target.value
+                  })}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                disabled={isSubmitting}
+                value={applicationData.email}
+                onChange={(e) => setApplicationData({
+                  ...applicationData,
+                  email: e.target.value
+                })}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone
+              </label>
+              <input
+                type="tel"
+                required
+                disabled={isSubmitting}
+                value={applicationData.phone}
+                onChange={(e) => setApplicationData({
+                  ...applicationData,
+                  phone: e.target.value
+                })}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Resume & Cover Letter */}
+        {applicationStep === 2 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Resume & Cover Letter</h3>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Resume
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <div className="text-sm text-gray-600">
+                  <label className="cursor-pointer text-blue-600 hover:text-blue-500">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      disabled={isSubmitting}
+                      className="hidden"
+                    />
+                    Click to upload
+                  </label>
+                  {' '}or drag and drop
                 </div>
-                {step < 3 && (
-                  <div className={`w-16 h-1 mx-2 ${
-                    step < applicationStep ? 'bg-blue-600' : 'bg-gray-200'
-                  }`} />
+                <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
+                {applicationData.resume && (
+                  <p className="text-sm text-green-600 mt-2">
+                    ✓ {applicationData.resume.name}
+                  </p>
                 )}
               </div>
-            ))}
-          </div>
-
-          <form onSubmit={handleApplicationSubmit}>
-            {/* Step 1: Personal Information */}
-            {applicationStep === 1 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={applicationData.firstName}
-                      onChange={(e) => setApplicationData({
-                        ...applicationData,
-                        firstName: e.target.value
-                      })}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={applicationData.lastName}
-                      onChange={(e) => setApplicationData({
-                        ...applicationData,
-                        lastName: e.target.value
-                      })}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={applicationData.email}
-                    onChange={(e) => setApplicationData({
-                      ...applicationData,
-                      email: e.target.value
-                    })}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={applicationData.phone}
-                    onChange={(e) => setApplicationData({
-                      ...applicationData,
-                      phone: e.target.value
-                    })}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Resume & Cover Letter */}
-            {applicationStep === 2 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Resume & Cover Letter</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Resume
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <div className="text-sm text-gray-600">
-                      <label className="cursor-pointer text-blue-600 hover:text-blue-500">
-                        <input
-                          type="file"
-                          accept=".pdf,.doc,.docx"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                        />
-                        Click to upload
-                      </label>
-                      {' '}or drag and drop
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
-                    {applicationData.resume && (
-                      <p className="text-sm text-green-600 mt-2">
-                        ✓ {applicationData.resume.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cover Letter (Optional)
-                  </label>
-                  <textarea
-                    rows={6}
-                    value={applicationData.coverLetter}
-                    onChange={(e) => setApplicationData({
-                      ...applicationData,
-                      coverLetter: e.target.value
-                    })}
-                    placeholder="Tell us why you're interested in this position..."
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Review & Submit */}
-            {applicationStep === 3 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Review Your Application</h3>
-                
-                <div className="bg-gray-50 rounded-md p-4 space-y-3">
-                  <div>
-                    <span className="font-medium text-gray-700">Name: </span>
-                    <span>{applicationData.firstName} {applicationData.lastName}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Email: </span>
-                    <span>{applicationData.email}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Phone: </span>
-                    <span>{applicationData.phone}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Resume: </span>
-                    <span>{applicationData.resume ? applicationData.resume.name : 'No file uploaded'}</span>
-                  </div>
-                  {applicationData.coverLetter && (
-                    <div>
-                      <span className="font-medium text-gray-700">Cover Letter: </span>
-                      <p className="text-sm text-gray-600 mt-1">{applicationData.coverLetter.substring(0, 100)}...</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="flex justify-between mt-8">
-              <button
-                type="button"
-                onClick={() => applicationStep > 1 ? setApplicationStep(applicationStep - 1) : setIsApplying(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                {applicationStep > 1 ? 'Previous' : 'Cancel'}
-              </button>
-              
-              <button
-                type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                {applicationStep === 3 ? 'Submit Application' : 'Next'}
-              </button>
             </div>
-          </form>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Cover Letter (Optional)
+              </label>
+              <textarea
+                rows={6}
+                disabled={isSubmitting}
+                value={applicationData.coverLetter}
+                onChange={(e) => setApplicationData({
+                  ...applicationData,
+                  coverLetter: e.target.value
+                })}
+                placeholder="Tell us why you're interested in this position..."
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Review & Submit */}
+        {applicationStep === 3 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Review Your Application</h3>
+            
+            <div className="bg-gray-50 rounded-md p-4 space-y-3">
+              <div>
+                <span className="font-medium text-gray-700">Name: </span>
+                <span>{applicationData.firstName} {applicationData.lastName}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-700">Email: </span>
+                <span>{applicationData.email}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-700">Phone: </span>
+                <span>{applicationData.phone}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-700">Resume: </span>
+                <span>{applicationData.resume ? applicationData.resume.name : 'No file uploaded'}</span>
+              </div>
+              {applicationData.coverLetter && (
+                <div>
+                  <span className="font-medium text-gray-700">Cover Letter: </span>
+                  <p className="text-sm text-gray-600 mt-1">{applicationData.coverLetter.substring(0, 100)}...</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex justify-between mt-8">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handlePreviousStep}
+            disabled={isSubmitting}
+          >
+            {applicationStep > 1 ? 'Previous' : 'Cancel'}
+          </Button>
+          
+          <Button
+            type="submit"
+            variant="primary"
+            loading={isSubmitting && applicationStep === 3}
+            disabled={isSubmitting}
+          >
+            {applicationStep === 3 ? 'Submit Application' : 'Next'}
+          </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 
@@ -363,12 +384,14 @@ const JobDetailPage = () => {
           </div>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="lg"
           onClick={() => setIsApplying(true)}
-          className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          className="w-full sm:w-auto"
         >
           Apply Now
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -456,7 +479,14 @@ const JobDetailPage = () => {
       </div>
 
       {/* Application Modal */}
-      {isApplying && <ApplicationModal />}
+      <Modal
+        isOpen={isApplying}
+        onClose={() => !isSubmitting && setIsApplying(false)}
+        title={`Apply for ${job.title}`}
+        size="lg"
+      >
+        <ApplicationModalContent />
+      </Modal>
     </div>
   );
 };
