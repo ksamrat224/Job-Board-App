@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Eye, Edit, Trash2, Filter, Search, ChevronDown, Users, Briefcase, Calendar, TrendingUp } from 'lucide-react';
+import Modal from '../components/Modal';
+import Button from '../components/Button';
 
 const EmployerDashboard = () => {
   const [activeTab, setActiveTab] = useState('jobs');
   const [showJobModal, setShowJobModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [jobForm, setJobForm] = useState({
     title: '',
     department: '',
@@ -58,7 +61,7 @@ const EmployerDashboard = () => {
     }
   ]);
 
-  const [applicants] = useState([
+  const [applicants, setApplicants] = useState([
     {
       id: 1,
       jobId: 1,
@@ -91,35 +94,62 @@ const EmployerDashboard = () => {
       experience: '3 years',
       location: 'Austin, TX',
       resumeUrl: '#'
+    },
+    {
+      id: 4,
+      jobId: 1,
+      name: 'Sarah Wilson',
+      email: 'sarah.wilson@email.com',
+      appliedDate: '2024-01-19',
+      status: 'Applied',
+      experience: '4 years',
+      location: 'San Francisco, CA',
+      resumeUrl: '#'
     }
   ]);
 
   const [filters, setFilters] = useState({
     status: '',
     department: '',
-    search: ''
+    search: '',
+    jobFilter: '',
+    statusFilter: ''
   });
 
-  const handleJobSubmit = (e) => {
+  const handleJobSubmit = async (e) => {
     e.preventDefault();
-    if (selectedJob) {
-      // Update existing job
-      setJobs(jobs.map(job => 
-        job.id === selectedJob.id ? { ...job, ...jobForm } : job
-      ));
-    } else {
-      // Create new job
-      const newJob = {
-        id: Date.now(),
-        ...jobForm,
-        status: 'Draft',
-        applicants: 0,
-        posted: new Date().toISOString().split('T')[0],
-        salary: `$${jobForm.salaryMin} - $${jobForm.salaryMax}`
-      };
-      setJobs([...jobs, newJob]);
-    }
-    
+    setIsSubmitting(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      if (selectedJob) {
+        // Update existing job
+        setJobs(jobs.map(job => 
+          job.id === selectedJob.id ? { 
+            ...job, 
+            ...jobForm,
+            salary: `$${jobForm.salaryMin} - $${jobForm.salaryMax}`
+          } : job
+        ));
+      } else {
+        // Create new job
+        const newJob = {
+          id: Date.now(),
+          ...jobForm,
+          status: 'Draft',
+          applicants: 0,
+          posted: new Date().toISOString().split('T')[0],
+          salary: `$${jobForm.salaryMin} - $${jobForm.salaryMax}`
+        };
+        setJobs([...jobs, newJob]);
+      }
+      
+      handleCloseModal();
+      setIsSubmitting(false);
+    }, 1500);
+  };
+
+  const handleCloseModal = () => {
     setShowJobModal(false);
     setSelectedJob(null);
     setJobForm({
@@ -138,22 +168,25 @@ const EmployerDashboard = () => {
 
   const handleEditJob = (job) => {
     setSelectedJob(job);
-    const [min, max] = job.salary.replace(/[$,]/g, '').split(' - ');
+    const salaryParts = job.salary.replace(/[$,]/g, '').split(' - ');
     setJobForm({
       ...job,
-      salaryMin: min,
-      salaryMax: max
+      salaryMin: salaryParts[0] || '',
+      salaryMax: salaryParts[1] || ''
     });
     setShowJobModal(true);
   };
 
   const handleDeleteJob = (jobId) => {
-    setJobs(jobs.filter(job => job.id !== jobId));
+    if (window.confirm('Are you sure you want to delete this job posting?')) {
+      setJobs(jobs.filter(job => job.id !== jobId));
+    }
   };
 
   const updateApplicantStatus = (applicantId, newStatus) => {
-    // This would update the applicant status in real implementation
-    console.log(`Updated applicant ${applicantId} to ${newStatus}`);
+    setApplicants(applicants.map(applicant =>
+      applicant.id === applicantId ? { ...applicant, status: newStatus } : applicant
+    ));
   };
 
   const getStatusColor = (status) => {
@@ -179,194 +212,19 @@ const EmployerDashboard = () => {
     }
   };
 
-  const JobModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {selectedJob ? 'Edit Job' : 'Post New Job'}
-            </h2>
-            <button
-              onClick={() => {
-                setShowJobModal(false);
-                setSelectedJob(null);
-              }}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-          </div>
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+                        job.department.toLowerCase().includes(filters.search.toLowerCase());
+    const matchesStatus = !filters.status || job.status === filters.status;
+    const matchesDepartment = !filters.department || job.department === filters.department;
+    return matchesSearch && matchesStatus && matchesDepartment;
+  });
 
-          <form onSubmit={handleJobSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={jobForm.title}
-                  onChange={(e) => setJobForm({...jobForm, title: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g. Senior Frontend Developer"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Department
-                </label>
-                <select
-                  value={jobForm.department}
-                  onChange={(e) => setJobForm({...jobForm, department: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Department</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Product">Product</option>
-                  <option value="Design">Design</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Data">Data</option>
-                  <option value="HR">Human Resources</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={jobForm.location}
-                  onChange={(e) => setJobForm({...jobForm, location: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g. San Francisco, CA or Remote"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Type
-                </label>
-                <select
-                  value={jobForm.type}
-                  onChange={(e) => setJobForm({...jobForm, type: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Full-time">Full-time</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Internship">Internship</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Experience Level
-                </label>
-                <select
-                  value={jobForm.experienceLevel}
-                  onChange={(e) => setJobForm({...jobForm, experienceLevel: e.target.value})}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Entry">Entry Level</option>
-                  <option value="Mid">Mid Level</option>
-                  <option value="Senior">Senior Level</option>
-                  <option value="Lead">Lead/Principal</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Salary Range
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={jobForm.salaryMin}
-                    onChange={(e) => setJobForm({...jobForm, salaryMin: e.target.value})}
-                    className="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="flex items-center text-gray-500">to</span>
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={jobForm.salaryMax}
-                    onChange={(e) => setJobForm({...jobForm, salaryMax: e.target.value})}
-                    className="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Job Description
-              </label>
-              <textarea
-                rows={6}
-                required
-                value={jobForm.description}
-                onChange={(e) => setJobForm({...jobForm, description: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Describe the role, responsibilities, and what you're looking for..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Requirements
-              </label>
-              <textarea
-                rows={4}
-                value={jobForm.requirements}
-                onChange={(e) => setJobForm({...jobForm, requirements: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="List the required skills, experience, and qualifications..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Benefits
-              </label>
-              <textarea
-                rows={3}
-                value={jobForm.benefits}
-                onChange={(e) => setJobForm({...jobForm, benefits: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Describe the benefits, perks, and company culture..."
-              />
-            </div>
-
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowJobModal(false);
-                  setSelectedJob(null);
-                }}
-                className="px-6 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                {selectedJob ? 'Update Job' : 'Post Job'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
+  const filteredApplicants = applicants.filter(applicant => {
+    const matchesJob = !filters.jobFilter || applicant.jobId.toString() === filters.jobFilter;
+    const matchesStatus = !filters.statusFilter || applicant.status === filters.statusFilter;
+    return matchesJob && matchesStatus;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -469,38 +327,51 @@ const EmployerDashboard = () => {
       {activeTab === 'jobs' && (
         <div>
           {/* Actions Bar */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+              <div className="relative w-full sm:w-auto">
                 <Search className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search jobs..."
                   value={filters.search}
                   onChange={(e) => setFilters({...filters, search: e.target.value})}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
                 />
               </div>
               
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({...filters, status: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
               >
                 <option value="">All Status</option>
                 <option value="Active">Active</option>
                 <option value="Draft">Draft</option>
                 <option value="Closed">Closed</option>
               </select>
+
+              <select
+                value={filters.department}
+                onChange={(e) => setFilters({...filters, department: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+              >
+                <option value="">All Departments</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Product">Product</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Data">Data</option>
+              </select>
             </div>
 
-            <button
+            <Button
               onClick={() => setShowJobModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="flex items-center space-x-2 w-full sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               <span>Post New Job</span>
-            </button>
+            </Button>
           </div>
 
           {/* Jobs Table */}
@@ -533,14 +404,7 @@ const EmployerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {jobs
-                    .filter(job => {
-                      const matchesSearch = job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-                                          job.department.toLowerCase().includes(filters.search.toLowerCase());
-                      const matchesStatus = !filters.status || job.status === filters.status;
-                      return matchesSearch && matchesStatus;
-                    })
-                    .map(job => (
+                  {filteredJobs.map(job => (
                     <tr key={job.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
@@ -567,21 +431,24 @@ const EmployerDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
+                          <Button variant="ghost" size="sm">
                             <Eye className="h-4 w-4" />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleEditJob(job)}
-                            className="text-gray-600 hover:text-gray-900"
                           >
                             <Edit className="h-4 w-4" />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleDeleteJob(job.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -589,6 +456,17 @@ const EmployerDashboard = () => {
                 </tbody>
               </table>
             </div>
+            {filteredJobs.length === 0 && (
+              <div className="text-center py-12">
+                <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                <p className="text-gray-600 mb-4">Get started by posting your first job</p>
+                <Button onClick={() => setShowJobModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post New Job
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -597,9 +475,11 @@ const EmployerDashboard = () => {
       {activeTab === 'applicants' && (
         <div>
           {/* Filters */}
-          <div className="flex items-center space-x-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6">
             <select
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={filters.jobFilter}
+              onChange={(e) => setFilters({...filters, jobFilter: e.target.value})}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="">All Jobs</option>
               {jobs.map(job => (
@@ -608,7 +488,9 @@ const EmployerDashboard = () => {
             </select>
             
             <select
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={filters.statusFilter}
+              onChange={(e) => setFilters({...filters, statusFilter: e.target.value})}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="">All Status</option>
               <option value="Applied">Applied</option>
@@ -646,7 +528,7 @@ const EmployerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {applicants.map(applicant => {
+                  {filteredApplicants.map(applicant => {
                     const job = jobs.find(j => j.id === applicant.jobId);
                     return (
                       <tr key={applicant.id} className="hover:bg-gray-50">
@@ -658,7 +540,7 @@ const EmployerDashboard = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {job?.title}
+                          {job?.title || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {applicant.experience}
@@ -680,16 +562,13 @@ const EmployerDashboard = () => {
                           </select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex items-center justify-end space-x-2">
-                            <a
-                              href={applicant.resumeUrl}
-                              className="text-blue-600 hover:text-blue-900"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              View Resume
-                            </a>
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(applicant.resumeUrl, '_blank')}
+                          >
+                            View Resume
+                          </Button>
                         </td>
                       </tr>
                     );
@@ -697,12 +576,199 @@ const EmployerDashboard = () => {
                 </tbody>
               </table>
             </div>
+            {filteredApplicants.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No applicants found</h3>
+                <p className="text-gray-600">Applications will appear here when candidates apply</p>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Job Modal */}
-      {showJobModal && <JobModal />}
+      <Modal
+        isOpen={showJobModal}
+        onClose={handleCloseModal}
+        title={selectedJob ? 'Edit Job' : 'Post New Job'}
+        size="xl"
+      >
+        <form onSubmit={handleJobSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Job Title
+              </label>
+              <input
+                type="text"
+                required
+                disabled={isSubmitting}
+                value={jobForm.title}
+                onChange={(e) => setJobForm({...jobForm, title: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                placeholder="e.g. Senior Frontend Developer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Department
+              </label>
+              <select
+                value={jobForm.department}
+                disabled={isSubmitting}
+                onChange={(e) => setJobForm({...jobForm, department: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <option value="">Select Department</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Product">Product</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Sales">Sales</option>
+                <option value="Data">Data</option>
+                <option value="HR">Human Resources</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                required
+                disabled={isSubmitting}
+                value={jobForm.location}
+                onChange={(e) => setJobForm({...jobForm, location: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                placeholder="e.g. San Francisco, CA or Remote"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Job Type
+              </label>
+              <select
+                value={jobForm.type}
+                disabled={isSubmitting}
+                onChange={(e) => setJobForm({...jobForm, type: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Experience Level
+              </label>
+              <select
+                value={jobForm.experienceLevel}
+                disabled={isSubmitting}
+                onChange={(e) => setJobForm({...jobForm, experienceLevel: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <option value="Entry">Entry Level</option>
+                <option value="Mid">Mid Level</option>
+                <option value="Senior">Senior Level</option>
+                <option value="Lead">Lead/Principal</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Salary Range
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  disabled={isSubmitting}
+                  value={jobForm.salaryMin}
+                  onChange={(e) => setJobForm({...jobForm, salaryMin: e.target.value})}
+                  className="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                />
+                <span className="flex items-center text-gray-500">to</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  disabled={isSubmitting}
+                  value={jobForm.salaryMax}
+                  onChange={(e) => setJobForm({...jobForm, salaryMax: e.target.value})}
+                  className="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Job Description
+            </label>
+            <textarea
+              rows={6}
+              required
+              disabled={isSubmitting}
+              value={jobForm.description}
+              onChange={(e) => setJobForm({...jobForm, description: e.target.value})}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              placeholder="Describe the role, responsibilities, and what you're looking for..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Requirements
+            </label>
+            <textarea
+              rows={4}
+              disabled={isSubmitting}
+              value={jobForm.requirements}
+              onChange={(e) => setJobForm({...jobForm, requirements: e.target.value})}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              placeholder="List the required skills, experience, and qualifications..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Benefits
+            </label>
+            <textarea
+              rows={3}
+              disabled={isSubmitting}
+              value={jobForm.benefits}
+              onChange={(e) => setJobForm({...jobForm, benefits: e.target.value})}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              placeholder="Describe the benefits, perks, and company culture..."
+            />
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleCloseModal}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {selectedJob ? 'Update Job' : 'Post Job'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
