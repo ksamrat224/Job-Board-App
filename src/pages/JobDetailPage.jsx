@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, DollarSign, Clock, Building, Heart, Share2, Upload, Check } from 'lucide-react';
-import Modal from '../components/Modal';
-import Button from '../components/Button';
+import React, { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  MapPin,
+  DollarSign,
+  Clock,
+  Building,
+  Heart,
+  Share2,
+  Upload,
+  Check,
+} from "lucide-react";
+import Modal from "../components/Modal";
+import Button from "../components/Button";
 
 const JobDetailPage = () => {
   const { id } = useParams();
@@ -10,27 +20,27 @@ const JobDetailPage = () => {
   const [applicationStep, setApplicationStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationData, setApplicationData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    coverLetter: '',
-    resume: null
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    coverLetter: "",
+    resume: null,
   });
 
   // Mock job data
   const job = {
     id: 1,
-    title: 'Senior Frontend Developer',
-    company: 'TechCorp Inc.',
-    location: 'San Francisco, CA',
-    salary: '$120,000 - $150,000',
-    type: 'Full-time',
+    title: "Senior Frontend Developer",
+    company: "TechCorp Inc.",
+    location: "San Francisco, CA",
+    salary: "$120,000 - $150,000",
+    type: "Full-time",
     remote: true,
-    experienceLevel: 'Senior',
-    companySize: 'Large',
-    postedDate: '2 days ago',
-    logo: '🏢',
+    experienceLevel: "Senior",
+    companySize: "Large",
+    postedDate: "2 days ago",
+    logo: "🏢",
     description: `
       We are looking for an experienced Frontend Developer to join our dynamic team. 
       You will be responsible for building user-facing features and ensuring excellent user experience.
@@ -54,57 +64,58 @@ const JobDetailPage = () => {
       - Professional development budget
     `,
     company_info: {
-      about: 'TechCorp Inc. is a leading technology company focused on building innovative solutions for businesses worldwide.',
-      size: '1000+ employees',
-      founded: '2010',
-      website: 'https://techcorp.com'
-    }
+      about:
+        "TechCorp Inc. is a leading technology company focused on building innovative solutions for businesses worldwide.",
+      size: "1000+ employees",
+      founded: "2010",
+      website: "https://techcorp.com",
+    },
   };
 
   // Mock similar jobs
   const similarJobs = [
     {
       id: 2,
-      title: 'Frontend Developer',
-      company: 'WebFlow Inc.',
-      location: 'Remote',
-      salary: '$90,000 - $120,000',
-      logo: '💻'
+      title: "Frontend Developer",
+      company: "WebFlow Inc.",
+      location: "Remote",
+      salary: "$90,000 - $120,000",
+      logo: "💻",
     },
     {
       id: 3,
-      title: 'React Developer',
-      company: 'StartupX',
-      location: 'Austin, TX',
-      salary: '$100,000 - $130,000',
-      logo: '🚀'
-    }
+      title: "React Developer",
+      company: "StartupX",
+      location: "Austin, TX",
+      salary: "$100,000 - $130,000",
+      logo: "🚀",
+    },
   ];
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (applicationStep < 3) {
       setApplicationStep(applicationStep + 1);
     } else {
       setIsSubmitting(true);
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert('Application submitted successfully!');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      alert("Application submitted successfully!");
       setIsApplying(false);
       setApplicationStep(1);
       setIsSubmitting(false);
-      
+
       // Reset form
       setApplicationData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        coverLetter: '',
-        resume: null
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        coverLetter: "",
+        resume: null,
       });
     }
   };
@@ -113,7 +124,7 @@ const JobDetailPage = () => {
     const file = e.target.files[0];
     setApplicationData({
       ...applicationData,
-      resume: file
+      resume: file,
     });
   };
 
@@ -131,17 +142,21 @@ const JobDetailPage = () => {
       <div className="flex items-center mb-8">
         {[1, 2, 3].map((step) => (
           <div key={step} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step <= applicationStep 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-600'
-            }`}>
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                step <= applicationStep
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
               {step < applicationStep ? <Check className="h-4 w-4" /> : step}
             </div>
             {step < 3 && (
-              <div className={`w-16 h-1 mx-2 ${
-                step < applicationStep ? 'bg-blue-600' : 'bg-gray-200'
-              }`} />
+              <div
+                className={`w-16 h-1 mx-2 ${
+                  step < applicationStep ? "bg-blue-600" : "bg-gray-200"
+                }`}
+              />
             )}
           </div>
         ))}
@@ -151,8 +166,10 @@ const JobDetailPage = () => {
         {/* Step 1: Personal Information */}
         {applicationStep === 1 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Personal Information
+            </h3>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -163,10 +180,12 @@ const JobDetailPage = () => {
                   required
                   disabled={isSubmitting}
                   value={applicationData.firstName}
-                  onChange={(e) => setApplicationData({
-                    ...applicationData,
-                    firstName: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setApplicationData({
+                      ...applicationData,
+                      firstName: e.target.value,
+                    })
+                  }
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
@@ -179,10 +198,12 @@ const JobDetailPage = () => {
                   required
                   disabled={isSubmitting}
                   value={applicationData.lastName}
-                  onChange={(e) => setApplicationData({
-                    ...applicationData,
-                    lastName: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setApplicationData({
+                      ...applicationData,
+                      lastName: e.target.value,
+                    })
+                  }
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
@@ -197,10 +218,12 @@ const JobDetailPage = () => {
                 required
                 disabled={isSubmitting}
                 value={applicationData.email}
-                onChange={(e) => setApplicationData({
-                  ...applicationData,
-                  email: e.target.value
-                })}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    email: e.target.value,
+                  })
+                }
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -214,10 +237,12 @@ const JobDetailPage = () => {
                 required
                 disabled={isSubmitting}
                 value={applicationData.phone}
-                onChange={(e) => setApplicationData({
-                  ...applicationData,
-                  phone: e.target.value
-                })}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    phone: e.target.value,
+                  })
+                }
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
@@ -227,8 +252,10 @@ const JobDetailPage = () => {
         {/* Step 2: Resume & Cover Letter */}
         {applicationStep === 2 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Resume & Cover Letter</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Resume & Cover Letter
+            </h3>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Resume
@@ -245,10 +272,12 @@ const JobDetailPage = () => {
                       className="hidden"
                     />
                     Click to upload
-                  </label>
-                  {' '}or drag and drop
+                  </label>{" "}
+                  or drag and drop
                 </div>
-                <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  PDF, DOC, DOCX up to 10MB
+                </p>
                 {applicationData.resume && (
                   <p className="text-sm text-green-600 mt-2">
                     ✓ {applicationData.resume.name}
@@ -265,10 +294,12 @@ const JobDetailPage = () => {
                 rows={6}
                 disabled={isSubmitting}
                 value={applicationData.coverLetter}
-                onChange={(e) => setApplicationData({
-                  ...applicationData,
-                  coverLetter: e.target.value
-                })}
+                onChange={(e) =>
+                  setApplicationData({
+                    ...applicationData,
+                    coverLetter: e.target.value,
+                  })
+                }
                 placeholder="Tell us why you're interested in this position..."
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               />
@@ -279,12 +310,16 @@ const JobDetailPage = () => {
         {/* Step 3: Review & Submit */}
         {applicationStep === 3 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Review Your Application</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Review Your Application
+            </h3>
+
             <div className="bg-gray-50 rounded-md p-4 space-y-3">
               <div>
                 <span className="font-medium text-gray-700">Name: </span>
-                <span>{applicationData.firstName} {applicationData.lastName}</span>
+                <span>
+                  {applicationData.firstName} {applicationData.lastName}
+                </span>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Email: </span>
@@ -296,12 +331,20 @@ const JobDetailPage = () => {
               </div>
               <div>
                 <span className="font-medium text-gray-700">Resume: </span>
-                <span>{applicationData.resume ? applicationData.resume.name : 'No file uploaded'}</span>
+                <span>
+                  {applicationData.resume
+                    ? applicationData.resume.name
+                    : "No file uploaded"}
+                </span>
               </div>
               {applicationData.coverLetter && (
                 <div>
-                  <span className="font-medium text-gray-700">Cover Letter: </span>
-                  <p className="text-sm text-gray-600 mt-1">{applicationData.coverLetter.substring(0, 100)}...</p>
+                  <span className="font-medium text-gray-700">
+                    Cover Letter:{" "}
+                  </span>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {applicationData.coverLetter.substring(0, 100)}...
+                  </p>
                 </div>
               )}
             </div>
@@ -316,16 +359,16 @@ const JobDetailPage = () => {
             onClick={handlePreviousStep}
             disabled={isSubmitting}
           >
-            {applicationStep > 1 ? 'Previous' : 'Cancel'}
+            {applicationStep > 1 ? "Previous" : "Cancel"}
           </Button>
-          
+
           <Button
             type="submit"
             variant="primary"
             loading={isSubmitting && applicationStep === 3}
             disabled={isSubmitting}
           >
-            {applicationStep === 3 ? 'Submit Application' : 'Next'}
+            {applicationStep === 3 ? "Submit Application" : "Next"}
           </Button>
         </div>
       </form>
@@ -349,11 +392,13 @@ const JobDetailPage = () => {
           <div className="flex items-center space-x-4">
             <span className="text-4xl">{job.logo}</span>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {job.title}
+              </h1>
               <p className="text-xl text-gray-600">{job.company}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
               <Heart className="h-5 w-5" />
@@ -368,7 +413,9 @@ const JobDetailPage = () => {
           <div className="flex items-center space-x-2">
             <MapPin className="h-5 w-5" />
             <span>{job.location}</span>
-            {job.remote && <span className="text-green-600 font-medium">• Remote</span>}
+            {job.remote && (
+              <span className="text-green-600 font-medium">• Remote</span>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             <DollarSign className="h-5 w-5" />
@@ -398,19 +445,24 @@ const JobDetailPage = () => {
         {/* Job Description */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Job Description</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Job Description
+            </h2>
             <div className="prose prose-blue max-w-none">
-              {job.description.split('\n').map((paragraph, index) => {
-                if (paragraph.startsWith('##')) {
+              {job.description.split("\n").map((paragraph, index) => {
+                if (paragraph.startsWith("##")) {
                   return (
-                    <h3 key={index} className="text-lg font-semibold text-gray-900 mt-6 mb-3">
-                      {paragraph.replace('## ', '')}
+                    <h3
+                      key={index}
+                      className="text-lg font-semibold text-gray-900 mt-6 mb-3"
+                    >
+                      {paragraph.replace("## ", "")}
                     </h3>
                   );
-                } else if (paragraph.startsWith('-')) {
+                } else if (paragraph.startsWith("-")) {
                   return (
                     <li key={index} className="text-gray-700 mb-1">
-                      {paragraph.replace('- ', '')}
+                      {paragraph.replace("- ", "")}
                     </li>
                   );
                 } else if (paragraph.trim()) {
@@ -430,7 +482,9 @@ const JobDetailPage = () => {
         <div className="space-y-6">
           {/* Company Info */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">About {job.company}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              About {job.company}
+            </h3>
             <div className="space-y-3">
               <p className="text-gray-700 text-sm">{job.company_info.about}</p>
               <div className="text-sm">
@@ -439,7 +493,9 @@ const JobDetailPage = () => {
               </div>
               <div className="text-sm">
                 <span className="font-medium text-gray-700">Founded: </span>
-                <span className="text-gray-600">{job.company_info.founded}</span>
+                <span className="text-gray-600">
+                  {job.company_info.founded}
+                </span>
               </div>
               <a
                 href={job.company_info.website}
@@ -454,9 +510,11 @@ const JobDetailPage = () => {
 
           {/* Similar Jobs */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Similar Jobs</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Similar Jobs
+            </h3>
             <div className="space-y-4">
-              {similarJobs.map(similarJob => (
+              {similarJobs.map((similarJob) => (
                 <Link
                   key={similarJob.id}
                   to={`/jobs/${similarJob.id}`}
@@ -465,10 +523,18 @@ const JobDetailPage = () => {
                   <div className="flex items-center space-x-3">
                     <span className="text-xl">{similarJob.logo}</span>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 truncate">{similarJob.title}</h4>
-                      <p className="text-sm text-gray-600">{similarJob.company}</p>
-                      <p className="text-sm text-gray-500">{similarJob.location}</p>
-                      <p className="text-sm font-medium text-green-600">{similarJob.salary}</p>
+                      <h4 className="font-medium text-gray-900 truncate">
+                        {similarJob.title}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {similarJob.company}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {similarJob.location}
+                      </p>
+                      <p className="text-sm font-medium text-green-600">
+                        {similarJob.salary}
+                      </p>
                     </div>
                   </div>
                 </Link>
