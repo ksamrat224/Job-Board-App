@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Briefcase, Mail, Lock } from 'lucide-react';
+import Button from '../components/Button';
 
 const LoginPage = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState('jobseeker');
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate login
+    setIsLoading(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     onLogin(userType);
+    setIsLoading(false);
   };
 
   const handleInputChange = (e) => {
@@ -51,6 +58,7 @@ const LoginPage = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() => setUserType('jobseeker')}
+                disabled={isLoading}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   userType === 'jobseeker'
                     ? 'bg-white text-blue-600 shadow-sm'
@@ -62,6 +70,7 @@ const LoginPage = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() => setUserType('employer')}
+                disabled={isLoading}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   userType === 'employer'
                     ? 'bg-white text-blue-600 shadow-sm'
@@ -88,9 +97,10 @@ const LoginPage = ({ onLogin }) => {
                   name="email"
                   type="email"
                   required
+                  disabled={isLoading}
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your email"
                 />
               </div>
@@ -110,15 +120,17 @@ const LoginPage = ({ onLogin }) => {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  disabled={isLoading}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  disabled={isLoading}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50"
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -136,7 +148,8 @@ const LoginPage = ({ onLogin }) => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  disabled={isLoading}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Remember me
@@ -150,12 +163,16 @@ const LoginPage = ({ onLogin }) => {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              variant="primary"
+              size="lg"
+              loading={isLoading}
+              disabled={isLoading}
+              className="w-full"
             >
               Sign in as {userType === 'jobseeker' ? 'Job Seeker' : 'Employer'}
-            </button>
+            </Button>
           </form>
         </div>
       </div>
