@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Briefcase, Mail, Lock, User } from 'lucide-react';
+import Button from '../components/Button';
 
 const SignupPage = ({ onSignup }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userType, setUserType] = useState('jobseeker');
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -16,7 +18,7 @@ const SignupPage = ({ onSignup }) => {
     acceptTerms: false
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
@@ -26,8 +28,14 @@ const SignupPage = ({ onSignup }) => {
       alert('Please accept the terms and conditions');
       return;
     }
-    // Simulate signup
+    
+    setIsLoading(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     onSignup(userType);
+    setIsLoading(false);
   };
 
   const handleInputChange = (e) => {
@@ -66,6 +74,7 @@ const SignupPage = ({ onSignup }) => {
               <button
                 type="button"
                 onClick={() => setUserType('jobseeker')}
+                disabled={isLoading}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   userType === 'jobseeker'
                     ? 'bg-white text-blue-600 shadow-sm'
@@ -77,6 +86,7 @@ const SignupPage = ({ onSignup }) => {
               <button
                 type="button"
                 onClick={() => setUserType('employer')}
+                disabled={isLoading}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   userType === 'employer'
                     ? 'bg-white text-blue-600 shadow-sm'
@@ -104,9 +114,10 @@ const SignupPage = ({ onSignup }) => {
                     name="firstName"
                     type="text"
                     required
+                    disabled={isLoading}
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="First name"
                   />
                 </div>
@@ -121,9 +132,10 @@ const SignupPage = ({ onSignup }) => {
                   name="lastName"
                   type="text"
                   required
+                  disabled={isLoading}
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className="block w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Last name"
                 />
               </div>
@@ -140,9 +152,10 @@ const SignupPage = ({ onSignup }) => {
                   name="companyName"
                   type="text"
                   required
+                  disabled={isLoading}
                   value={formData.companyName}
                   onChange={handleInputChange}
-                  className="block w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Your company name"
                 />
               </div>
@@ -162,9 +175,10 @@ const SignupPage = ({ onSignup }) => {
                   name="email"
                   type="email"
                   required
+                  disabled={isLoading}
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your email"
                 />
               </div>
@@ -184,15 +198,17 @@ const SignupPage = ({ onSignup }) => {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  disabled={isLoading}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="block w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Create a password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  disabled={isLoading}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -217,15 +233,17 @@ const SignupPage = ({ onSignup }) => {
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
+                  disabled={isLoading}
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="block w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Confirm your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  disabled={isLoading}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -243,9 +261,10 @@ const SignupPage = ({ onSignup }) => {
                 name="acceptTerms"
                 type="checkbox"
                 required
+                disabled={isLoading}
                 checked={formData.acceptTerms}
                 onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
               />
               <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-700">
                 I agree to the{' '}
@@ -260,12 +279,16 @@ const SignupPage = ({ onSignup }) => {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors mt-6"
+              variant="primary"
+              size="lg"
+              loading={isLoading}
+              disabled={isLoading}
+              className="w-full mt-6"
             >
               Create {userType === 'jobseeker' ? 'Job Seeker' : 'Employer'} Account
-            </button>
+            </Button>
           </form>
         </div>
       </div>
